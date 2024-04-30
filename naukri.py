@@ -143,12 +143,12 @@ class naukri():
         job_header_text = sour.find("div","jobs-list-header").find("span")['title']
         # Un-commenting this will cause the bot to fetch all the matching jobs that matched the search
         # Which may result in subsequent blocking of the Naukri ID/IP.
-        # self.get_all_matching_jobs(job_header_text) 
+        # self.get_all_matching_jobs(job_header_text,sour) 
         page_url = self.driver.current_url
         
 
 
-    def get_all_matching_jobs(self,job_header_text):
+    def get_all_matching_jobs(self,job_header_text,sour:BeautifulSoup):
         job_header_results = int(job_header_text.split("of")[1].strip())
         #total pages to be requested
         tpr = int(job_header_results/20)

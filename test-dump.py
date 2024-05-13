@@ -43,4 +43,15 @@ with open("out.html","wb") as outp:
 all_divs = soup.find_all("div","kb0PBd")
 all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
 all_a_tag_hrefs = [x['href'] for x in all_a_tags]
+all_a_tags_text = [x.text for x in all_a_tags]
 print(all_a_tag_hrefs)
+
+import pandas as pd
+
+df = pd.DataFrame(columns=["job_post","job_link"])
+df["job_post"] = all_a_tags
+df["job_link"] = all_a_tag_hrefs
+# for i in range(len(all_a_tags)):
+    # df.loc["job_post"]
+print(df)
+df.to_excel("usefuldata.xlsx")

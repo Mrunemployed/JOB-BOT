@@ -26,6 +26,11 @@ class naukri():
         with open("input_data.json","r") as input_file:
             self.data = json.load(input_file)
         print(self.data)
+        if self.data["filters"]["freshness-days"]["value"] != "":
+            self.filter_freshness = self.data["filters"]["freshness-days"]["value"]
+            self.filter_freshness_name = self.data["filters"]["freshness-days"]["filter-name"]
+        else:
+            self.filter_freshness = 7
 
     def login_handler(self,**kwargs):
         try:
@@ -48,9 +53,9 @@ class naukri():
             input_fields = self.driver.find_elements(By.TAG_NAME,"input")
             username_field = [x for x in input_fields if re.search("USERNAME",x.get_attribute("placeholder").upper())][0]
             print(username_field.get_attribute('placeholder'))
-            username_field.send_keys("khan.rudradip@gmail.com")
+            username_field.send_keys(self.data["username"])
             pass_field = [x for x in input_fields if re.search("PASSWORD",x.get_attribute("placeholder").upper())][0]
-            pass_field.send_keys("Ru@8420294514")
+            pass_field.send_keys(self.data["pasw"])
         except Exception as err:
             print("not found",err)
 
@@ -110,8 +115,8 @@ class naukri():
             WebDriverWait(self.driver,10).until(EC.element_to_be_clickable((By.XPATH,"/html/body/div[6]/div[8]/div[2]/form/div[3]/div/button")))
             save_resume_headline_btn.click()
 
-        except:
-            print("Error at update profile")
+        except Exception as err:
+            print("Error at update profile:",err)
 
     def search_matching_jobs(self,jobs_parameters:dict):
         try:
@@ -137,14 +142,40 @@ class naukri():
         pass
 
     def parse_job_search_page(self):
-
+        time.sleep(3)
         page_content = self.driver.page_source 
-        sour = BeautifulSoup(page_content,"html.parser")
-        job_header_text = sour.find("div","jobs-list-header").find("span")['title']
+        # sour = BeautifulSoup(page_content,"html.parser")
+        # job_header_text = sour.find("div","jobs-list-header").find("span")['title']
         # Un-commenting this will cause the bot to fetch all the matching jobs that matched the search
         # Which may result in subsequent blocking of the Naukri ID/IP.
         # self.get_all_matching_jobs(job_header_text,sour) 
         page_url = self.driver.current_url
+        filter_uri = page_url+"&"+self.filter_freshness_name+"="+str(self.filter_freshness)
+        print(filter_uri)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
+            'Content-Type': 'text/html',
+        }
+        req = requests.get(url=filter_uri,verify=False,headers=headers)
+        print(req.status_code)
+        # req = json.loads(req.text)
+        req = req.text
+        with open("out.html","w") as file:
+            file.writelines(req)
+        sour_candy = BeautifulSoup(req,"html.parser") 
+        all_divs = sour_candy.find_all("div","row1")
+        all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
+        all_a_tag_hrefs = [x['href'] for x in all_a_tags]
+        print(all_a_tag_hrefs)
+        all_a_tags_text = [x.text for x in all_a_tags]
+        print()
+        df = pd.DataFrame(columns=["Job_post","Job_link"])
+        df["Job_post"] = all_a_tags_text
+        df["Job_link"] = all_a_tag_hrefs
+        df.to_excel("job-data.xlsx")
+
+
+
         
 
 
@@ -168,6 +199,7 @@ nauk1.login_handler()
 nauk1.update_profile()
 current_uri = nauk1.search_matching_jobs(nauk1.data)
 print(current_uri)
+nauk1.parse_job_search_page()
 
 nauk1.sign_out()
 time.sleep(30)

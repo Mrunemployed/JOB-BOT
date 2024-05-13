@@ -1,8 +1,20 @@
 {
 "jobs": ["Cognos"],
 "preferred-location":[],
-"freshness-days":7,
+"filters":{
+    "freshness-days":{
+        "filter-name":"jobAge",
+        "value":3,
+        "comment": "value in days can be 1-15 days"
+    },
+    "work-mode":{
+        "filter-name":"wfhType",
+        "value": "",
+        "comment": "value can be 1 for wfo, 2 for remote and 3 for hybrid"
+    }
+
+},
 "comment":"freshness-days - 7-30 in days",
-"username": "khan.rudradip@gmail.com",
+"username": "clashwatson97@gmail.com",
 "pasw": "Ru@8420294514"
 }

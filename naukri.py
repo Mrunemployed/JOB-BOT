@@ -175,10 +175,6 @@ class naukri():
         df.to_excel("job-data.xlsx")
 
 
-
-        
-
-
     def get_all_matching_jobs(self,job_header_text,sour:BeautifulSoup):
         job_header_results = int(job_header_text.split("of")[1].strip())
         #total pages to be requested

@@ -82,7 +82,7 @@ class naukri():
         if sample_text.endswith("."):
             sample_text = sample_text[:len(sample_text)-1]
         else:
-            sample_text+="."
+            sample_text+="Experienced RPA and Django Developer with a proven track record of designing innovative solutions for IT processes and Applications. Skilled in Python,Django, Pandas, Flask and RPA with a strong background in ITSM and ITIL tools"
         return sample_text
 
     def update_profile(self):
@@ -144,36 +144,49 @@ class naukri():
     def parse_job_search_page(self):
         time.sleep(3)
         page_content = self.driver.page_source 
+        
+        page_url = self.driver.current_url
+        filter_uri = page_url+"&"+self.filter_freshness_name+"="+str(self.filter_freshness)
+        print(filter_uri)
+        self.driver.get(filter_uri)
+        js_content = self.driver.execute_script("return document.body.innerHTML;")
+        sour = BeautifulSoup(js_content,"html.parser")
+        js_in_sour = sour.findAll("script")
+        js_lst = [x.get_text() for x in js_in_sour]
+        # print(js_lst)
+        file = open("js_output.html","w")
+        file.writelines(js_lst)
+
+        for i in js_in_sour:
+            script = i.get_text()
+            if script is not None:
+                print(script)
+                script_content = self.driver.execute_script(script)
+                print(script_content)
+                with open("out.html","w") as file:
+                    if script_content is not None:
+                        file.write(script_content)
+
+        scripts = self.driver.find_elements(By.XPATH,"//script")
+
+        # with open("out.html","w") as file:
+        #     file.writelines(script_content)
+        # sour_scripts = BeautifulSoup(js_content,"html.parser")
+        # all_divs = sour_scripts.find_all("div","row1")
+        # all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
+        # all_a_tag_hrefs = [x['href'] for x in all_a_tags]
+        # print(all_a_tag_hrefs)
+        # all_a_tags_text = [x.text for x in all_a_tags]
+        # df = pd.DataFrame(columns=["Job_post","Job_link"])
+        # df["Job_post"] = all_a_tags_text
+        # df["Job_link"] = all_a_tag_hrefs
+        # df.to_excel("job-data.xlsx")
+
         # sour = BeautifulSoup(page_content,"html.parser")
         # job_header_text = sour.find("div","jobs-list-header").find("span")['title']
         # Un-commenting this will cause the bot to fetch all the matching jobs that matched the search
         # Which may result in subsequent blocking of the Naukri ID/IP.
         # self.get_all_matching_jobs(job_header_text,sour) 
-        page_url = self.driver.current_url
-        filter_uri = page_url+"&"+self.filter_freshness_name+"="+str(self.filter_freshness)
-        print(filter_uri)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
-            'Content-Type': 'text/html',
-        }
-        req = requests.get(url=filter_uri,verify=False,headers=headers)
-        print(req.status_code)
-        # req = json.loads(req.text)
-        req = req.text
-        with open("out.html","w") as file:
-            file.writelines(req)
-        sour_candy = BeautifulSoup(req,"html.parser") 
-        all_divs = sour_candy.find_all("div","row1")
-        all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
-        all_a_tag_hrefs = [x['href'] for x in all_a_tags]
-        print(all_a_tag_hrefs)
-        all_a_tags_text = [x.text for x in all_a_tags]
-        print()
-        df = pd.DataFrame(columns=["Job_post","Job_link"])
-        df["Job_post"] = all_a_tags_text
-        df["Job_link"] = all_a_tag_hrefs
-        df.to_excel("job-data.xlsx")
-
 
     def get_all_matching_jobs(self,job_header_text,sour:BeautifulSoup):
         job_header_results = int(job_header_text.split("of")[1].strip())
@@ -192,7 +205,7 @@ class naukri():
 
 nauk1 = naukri()
 nauk1.login_handler()
-nauk1.update_profile()
+# nauk1.update_profile()
 current_uri = nauk1.search_matching_jobs(nauk1.data)
 print(current_uri)
 nauk1.parse_job_search_page()

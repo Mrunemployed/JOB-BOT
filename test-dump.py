@@ -19,39 +19,54 @@ from selenium.webdriver.common.keys import Keys
 import re
 import time
 
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-driver = webdriver.Chrome(options=options)
-driver.get("https://google.com")
-search_box = driver.find_elements(By.TAG_NAME,"textarea")
-search_box = [x for x in search_box if re.search("SEARCH",x.get_attribute("title").upper())][0]
-search_box.send_keys("Cats",Keys.RETURN)
-time.sleep(5)
-content = driver.page_source
-soup = BeautifulSoup(content,"html.parser")
-# print(soup.prettify())
-with open("out.html","wb") as outp:
-    outp.write(soup.prettify("UTF-8"))
+# options = webdriver.ChromeOptions()
+# options.add_argument("--start-maximized")
+# driver = webdriver.Chrome(options=options)
+# driver.get("https://google.com")
+# search_box = driver.find_elements(By.TAG_NAME,"textarea")
+# search_box = [x for x in search_box if re.search("SEARCH",x.get_attribute("title").upper())][0]
+# search_box.send_keys("Cats",Keys.RETURN)
+# time.sleep(5)
+# content = driver.page_source
+# soup = BeautifulSoup(content,"html.parser")
+# # print(soup.prettify())
+# with open("out.html","wb") as outp:
+#     outp.write(soup.prettify("UTF-8"))
 
-# for i in soup.find_all("div","kb0PBd"):
-#     if i.find_all("a") != []:
-#         all_a_tags = i.find_all("a")[0]
-#         all_a_tag_hrefs = all_a_tags['href']
-#         print(all_a_tag_hrefs)
+# # for i in soup.find_all("div","kb0PBd"):
+# #     if i.find_all("a") != []:
+# #         all_a_tags = i.find_all("a")[0]
+# #         all_a_tag_hrefs = all_a_tags['href']
+# #         print(all_a_tag_hrefs)
     
 
-all_divs = soup.find_all("div","kb0PBd")
-all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
-all_a_tag_hrefs = [x['href'] for x in all_a_tags]
-all_a_tags_text = [x.text for x in all_a_tags]
-print(all_a_tag_hrefs)
+# all_divs = soup.find_all("div","kb0PBd")
+# all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
+# all_a_tag_hrefs = [x['href'] for x in all_a_tags]
+# all_a_tags_text = [x.text for x in all_a_tags]
+# print(all_a_tag_hrefs)
 
-import pandas as pd
+# import pandas as pd
 
-df = pd.DataFrame(columns=["job_post","job_link"])
-df["job_post"] = all_a_tags
-df["job_link"] = all_a_tag_hrefs
-# for i in range(len(all_a_tags)):
-    # df.loc["job_post"]
-print(df)
-df.to_excel("usefuldata.xlsx")
+# df = pd.DataFrame(columns=["job_post","job_link"])
+# df["job_post"] = all_a_tags
+# df["job_link"] = all_a_tag_hrefs
+# # for i in range(len(all_a_tags)):
+#     # df.loc["job_post"]
+# print(df)
+# df.to_excel("usefuldata.xlsx")
+
+with open("out.html","r") as readfile:
+    htm = readfile.read()
+soup = BeautifulSoup(htm,"html.parser")
+json_strings = []
+scripts = soup.find_all("script")
+for script in scripts:
+    script_content = script.string
+    if script_content:
+        print(script_content)
+        # json_data = re.findall(r'HL\[(.*?)\]', script_content)
+        # if json_data:
+        #     json_strings.extend(json_data)
+# for i in json_strings:
+#     print(i)

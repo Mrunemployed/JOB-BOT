@@ -142,45 +142,28 @@ class naukri():
         pass
 
     def parse_job_search_page(self):
-        time.sleep(3)
-        page_content = self.driver.page_source 
-        
+        time.sleep(3)        
         page_url = self.driver.current_url
         filter_uri = page_url+"&"+self.filter_freshness_name+"="+str(self.filter_freshness)
         print(filter_uri)
         self.driver.get(filter_uri)
-        js_content = self.driver.execute_script("return document.body.innerHTML;")
-        sour = BeautifulSoup(js_content,"html.parser")
-        js_in_sour = sour.findAll("script")
+        WebDriverWait(self.driver,30).until(EC.presence_of_element_located((By.CSS_SELECTOR,"div.srp-jobtuple-wrapper")))
+        # js_content = self.driver.execute_script("return document.body.innerHTML;")
+        sour = BeautifulSoup(self.driver.page_source,"html.parser")
+        js_in_sour = sour.findAll("div")
         js_lst = [x.get_text() for x in js_in_sour]
         # print(js_lst)
         file = open("js_output.html","w")
         file.writelines(js_lst)
-
-        for i in js_in_sour:
-            script = i.get_text()
-            if script is not None:
-                print(script)
-                script_content = self.driver.execute_script(script)
-                print(script_content)
-                with open("out.html","w") as file:
-                    if script_content is not None:
-                        file.write(script_content)
-
-        scripts = self.driver.find_elements(By.XPATH,"//script")
-
-        # with open("out.html","w") as file:
-        #     file.writelines(script_content)
-        # sour_scripts = BeautifulSoup(js_content,"html.parser")
-        # all_divs = sour_scripts.find_all("div","row1")
-        # all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
-        # all_a_tag_hrefs = [x['href'] for x in all_a_tags]
-        # print(all_a_tag_hrefs)
-        # all_a_tags_text = [x.text for x in all_a_tags]
-        # df = pd.DataFrame(columns=["Job_post","Job_link"])
-        # df["Job_post"] = all_a_tags_text
-        # df["Job_link"] = all_a_tag_hrefs
-        # df.to_excel("job-data.xlsx")
+        all_divs = sour.find_all("div","row1")
+        all_a_tags = [x.find("a") for x in all_divs if x.find("a") is not None]
+        all_a_tag_hrefs = [x['href'] for x in all_a_tags]
+        print(all_a_tag_hrefs)
+        all_a_tags_text = [x.text for x in all_a_tags]
+        df = pd.DataFrame(columns=["Job_post","Job_link"])
+        df["Job_post"] = all_a_tags_text
+        df["Job_link"] = all_a_tag_hrefs
+        df.to_excel("job-data.xlsx")
 
         # sour = BeautifulSoup(page_content,"html.parser")
         # job_header_text = sour.find("div","jobs-list-header").find("span")['title']

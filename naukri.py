@@ -29,6 +29,7 @@ class naukri():
         if self.data["filters"]["freshness-days"]["value"] != "":
             self.filter_freshness = self.data["filters"]["freshness-days"]["value"]
             self.filter_freshness_name = self.data["filters"]["freshness-days"]["filter-name"]
+            self.df = pd.DataFrame()
         else:
             self.filter_freshness = 7
 
@@ -163,13 +164,20 @@ class naukri():
         df = pd.DataFrame(columns=["Job_post","Job_link"])
         df["Job_post"] = all_a_tags_text
         df["Job_link"] = all_a_tag_hrefs
+        self.df = df
         df.to_excel("job-data.xlsx")
-
-        # sour = BeautifulSoup(page_content,"html.parser")
-        # job_header_text = sour.find("div","jobs-list-header").find("span")['title']
         # Un-commenting this will cause the bot to fetch all the matching jobs that matched the search
         # Which may result in subsequent blocking of the Naukri ID/IP.
         # self.get_all_matching_jobs(job_header_text,sour) 
+
+    def job_details(self):
+        for i,j in self.df.iterrows():
+            print(self.df["Job_post"][i])
+            self.driver.get(self.df["Job_link"][i])
+            WebDriverWait(self.driver,30).until(EC.presence_of_element_located((By.XPATH,"//*[@id='root']/div/main/div[1]/div[1]/section[2]/div[3]/div[1]")))
+            broth = BeautifulSoup(self.driver.page_source,"html.parser")
+            job_desc = broth.find("[class*='styles_JDC__dang-inner-html__']")
+            break
 
     def get_all_matching_jobs(self,job_header_text,sour:BeautifulSoup):
         job_header_results = int(job_header_text.split("of")[1].strip())
@@ -192,7 +200,7 @@ nauk1.login_handler()
 current_uri = nauk1.search_matching_jobs(nauk1.data)
 print(current_uri)
 nauk1.parse_job_search_page()
-
+nauk1.job_details()
 nauk1.sign_out()
 time.sleep(30)
     # self.driver.quit()

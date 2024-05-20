@@ -56,17 +56,11 @@ import time
 # print(df)
 # df.to_excel("usefuldata.xlsx")
 
-with open("out.html","r") as readfile:
-    htm = readfile.read()
-soup = BeautifulSoup(htm,"html.parser")
-json_strings = []
-scripts = soup.find_all("script")
-for script in scripts:
-    script_content = script.string
-    if script_content:
-        print(script_content)
-        # json_data = re.findall(r'HL\[(.*?)\]', script_content)
-        # if json_data:
-        #     json_strings.extend(json_data)
-# for i in json_strings:
-#     print(i)
+
+import pandas as pd
+
+df = pd.read_excel("job-data.xlsx")
+print(df)
+
+for i,j in df.iterrows():
+    print(df["Job_link"][i])
